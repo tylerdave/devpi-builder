@@ -103,11 +103,12 @@ def main(args=None):
     args = parser.parse_args(args=args)
 
     packages = requirements.read(args.requirements)
-    with wheeler.Builder() as builder, DevpiClient(args.index, args.user, args.password) as devpi_client:
-        if args.pure_index:
-            with DevpiClient(args.pure_index, args.user, args.password) as pure_index_client:
-                processor = Processor(builder, devpi_client, args.blacklist, pure_index_client, junit_xml=args.junit_xml, dry_run=args.dry_run)
+    with wheeler.Builder() as builder:
+        with DevpiClient(args.index, args.user, args.password) as devpi_client:
+            if args.pure_index:
+                with DevpiClient(args.pure_index, args.user, args.password) as pure_index_client:
+                    processor = Processor(builder, devpi_client, args.blacklist, pure_index_client, junit_xml=args.junit_xml, dry_run=args.dry_run)
+                    processor.build_packages(packages)
+            else:
+                processor = Processor(builder, devpi_client, args.blacklist, junit_xml=args.junit_xml, dry_run=args.dry_run)
                 processor.build_packages(packages)
-        else:
-            processor = Processor(builder, devpi_client, args.blacklist, junit_xml=args.junit_xml, dry_run=args.dry_run)
-            processor.build_packages(packages)
